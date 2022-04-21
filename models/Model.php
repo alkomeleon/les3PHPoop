@@ -20,34 +20,45 @@ abstract class Model implements IModel
 
     public function insert()
     {
+        $params = [];
         foreach ($this as $key => $value) {
-            //TODO собрать INSERT  пропустить id
-            var_dump($key . "=>" . $value);
+            if($key=="id"){
+                continue;
+            }
+            $params[$key]=$value;
         }
 
         $tableName = $this->getTableName();
 
-        $sql = "INSERT INTO `{$tableName}`(`name`, `description`, `price`) VALUES (:name, :description, :price)";
-        $params = [
-            'name' => 'Чай',
-            'description' => 'dsfsdf',
-            'price' => 123
-        ];
+        $sql = "INSERT INTO `{$tableName}` (`";
+        $sql .= implode("`, `", array_keys($params));
+        $sql .= "`) VALUES (:";
+        $sql .= implode(", :", array_keys($params));
+        $sql .= ");";
+
 
         Db::getInstance()->execute($sql, $params);
-        $this->id = 11;//TODO получить id Через lastInsertId()
+        $this->id = Db::getInstance()->lastInsertId();
         return $this;
     }
 
     public function delete() {
         $id = $this->id;
-        $sql = "DELETE...";
+        $tableName = $this->getTableName();
+        $sql = "DELETE FROM `{$tableName}` WHERE id = :id";
         return Db::getInstance()->execute($sql, ['id'=>$id]);
     }
 
     public function getOne($id) {
         $sql = "SELECT * FROM {$this->getTableName()} WHERE id = :id";
-        return Db::getInstance()->queryOne($sql, ['id' => $id]);
+        $params =  Db::getInstance()->queryOne($sql, ['id' => $id]);
+        foreach ($params as $key => $value){
+            $this->$key = $value;
+            if($key=='id'){
+                $this->id = intval($value);
+            }
+        }
+        return $this;
        // return Db::getInstance()->queryOneObject($sql, ['id' => $id], static::class);
     }
 

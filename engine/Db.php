@@ -10,7 +10,7 @@ class Db
         'driver' => 'mysql',
         'host' => 'localhost:3306',
         'login' => 'root',
-        'password' => '',
+        'password' => 'root',
         'database' => 'shop',
         'charset' => 'utf8',
     ];
@@ -34,7 +34,7 @@ class Db
 
     public function lastInsertId()
     {
-        //TODO вернуть id
+        return $this->getConnection()->lastInsertId();
     }
 
     private function prepareDsnString()
